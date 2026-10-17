@@ -23,7 +23,15 @@ class UserEndpoint {
   }
 
   fun savedTracks({ offset: int, limit: int }) {
-    assert(username != null)
+        if (username == null || username.trim().isEmpty) {
+      return {
+        limit: limit ?? 20,
+        nextOffset: null,
+        total: 0,
+        hasMore: false,
+        items: []
+      }.toJson()
+    }
     
     return lbApi.get_req(
       "/feedback/user/${username}/get-feedback",
@@ -60,7 +68,15 @@ class UserEndpoint {
   }
 
   fun savedPlaylists({ offset: int, limit: int }) {
-    assert(username != null)
+        if (username == null || username.trim().isEmpty) {
+      return {
+        limit: limit ?? 20,
+        nextOffset: null,
+        total: 0,
+        hasMore: false,
+        items: []
+      }.toJson()
+    }
     
     return lbApi.get_req(
       "/user/${username}/playlists",
@@ -88,7 +104,15 @@ class UserEndpoint {
   }
 
   fun savedAlbums({ offset: int, limit: int }) {
-    assert(username != null)
+        if (username == null || username.trim().isEmpty) {
+      return {
+        limit: limit ?? 20,
+        nextOffset: null,
+        total: 0,
+        hasMore: false,
+        items: []
+      }.toJson()
+    }
     return emulator.savedEntities(
       "album",
       offset: offset,
@@ -97,7 +121,7 @@ class UserEndpoint {
   }
 
   fun isSavedPlaylist(playlistId: string) { // Future<bool>
-    assert(username != null)
+    if (username == null || username.trim().isEmpty) return Future.value(false)
   
     return lbApi.get_req(
       "/playlist/${playlistId}",
@@ -113,7 +137,7 @@ class UserEndpoint {
   }
 
   fun isSavedTracks(trackIds: List) { // Future<List<bool>>
-    assert(username != null)
+    if (username == null || username.trim().isEmpty) return Future.value(trackIds.map((id) => false).toList())
   
     return lbApi.post(
       "/feedback/user/${username}/get-feedback-for-recordings",
@@ -132,13 +156,21 @@ class UserEndpoint {
   }
 
   fun isSavedAlbums(albumIds: List) { // Future<List<bool>>
-    assert(username != null)
+    if (username == null || username.trim().isEmpty) return Future.value(albumIds.map((id) => false).toList())
   
     return emulator.isSavedEntities("album", albumIds)
   }
 
   fun savedArtists({ offset: int, limit: int }) { // Future<List>
-    assert(username != null)
+        if (username == null || username.trim().isEmpty) {
+      return {
+        limit: limit ?? 20,
+        nextOffset: null,
+        total: 0,
+        hasMore: false,
+        items: []
+      }.toJson()
+    }
     
     return emulator.savedEntities(
       "artist",
@@ -148,6 +180,7 @@ class UserEndpoint {
   }
 
   fun isSavedArtists(artistIds: List) { // Future<List<bool>>
+    if (username == null || username.trim().isEmpty) return Future.value(artistIds.map((id) => false).toList())
     return emulator.isSavedEntities("artist", artistIds)
   }
 }
