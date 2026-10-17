@@ -22,7 +22,10 @@ class BrowseEndpoint {
     this.recommendations = Recommendations(this.lbApi, this.mbApi, this.username)
   }
 
-  fun sections({offset: int, limit: int}) {    
+  fun sections({offset: int, limit: int}) {
+    if (username == null || username.trim().isEmpty) {
+      return Future.value({limit: limit ?? 25, nextOffset: null, total: 0, hasMore: false, items: []}.toJson())
+    }
     var sectionsFutures = [
       () => recommendations.generateTopArtistRadios(),
       () => recommendations.generateMoodPlaylists(),
