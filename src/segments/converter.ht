@@ -64,9 +64,9 @@ class MbConverter {
   }
   
   static fun releases(releases: List) -> Map {
-    return releases.map((album){
+    return releases.where((album) => album["release-group"] != null).map((album){
       final releaseGroup = album["release-group"]
-      final releaseType = album["release-group"]["primary-type"]?.toLowerCase() ?? "album"
+      final releaseType = (releaseGroup["primary-type"] ?? "album").toLowerCase()
 
       return {
         id: releaseGroup["id"],
@@ -126,6 +126,7 @@ class MbConverter {
     return recordings
     .where((recording) => 
       recording["releases"] != null && recording["releases"].isNotEmpty
+      && recording["releases"].any((release) => release["release-group"] != null)
       && recording["artist-credit"] != null && recording["artist-credit"].isNotEmpty
     )
     .map((recording){
@@ -168,19 +169,20 @@ class LbConverter {
     .where((r)=>r["release_group_secondary_type"] != "Live")
     .map((release) {
       final regex = Regex("\\s*(x|X|&|and|vs\\.?|with|feat\\.?|featuring|ft\\.?|presents|/|;|×|\\+|,)\\s*")
-      var artistNames = Regex.splitString(release["artist_credit_name"], regex).toList()
-      var albumType = release["release_group_primary_type"].toLowerCase() ?? "album"
+      var artistNames = Regex.splitString(release["artist_credit_name"] ?? "", regex).toList()
+      var albumType = (release["release_group_primary_type"] ?? "album").toLowerCase()
 
       var artists = []
 
-      if(artistNames.length < release["artist_mbids"].length) {
-        artistNames = release["artist_credit_name"].split(".")
+      var artistMbids = release["artist_mbids"] ?? []
+      if(artistNames.length < artistMbids.length) {
+        artistNames = (release["artist_credit_name"] ?? "").split(".")
       }
-      for (var i = 0; i < release["artist_mbids"].length; i++) {
-        var id = release["artist_mbids"][i]
+      for (var i = 0; i < artistMbids.length; i++) {
+        var id = artistMbids[i]
         artists.add({
           id: id,
-          name: artistNames[i],
+          name: i < artistNames.length ? artistNames[i] : id,
           externalUri: "https://musicbrainz.org/artist/${id}"
         })
       }
